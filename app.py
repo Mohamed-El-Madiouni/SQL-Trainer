@@ -89,6 +89,8 @@ def get_exercises_for_theme(con: duckdb.DuckDBPyConnection, theme: str) -> list[
 def main() -> None:
     """Fonction principale de l'application Streamlit pour initier
     la base de données et afficher les exercices SQL."""
+    init_database("db.duckdb")  # Initialiser la base de données
+    con = connect_db("db.duckdb")  # Connexion à la base de données # pylint: disable=unused-variable
     init_session_state()
     show_welcome_screen()
 
