@@ -72,6 +72,20 @@ def get_available_themes(con: duckdb.DuckDBPyConnection) -> list[str]:
     return [theme[0] for theme in available_themes]
 
 
+def get_exercises_for_theme(con: duckdb.DuckDBPyConnection, theme: str) -> list[str]:
+    """Récupère les exercices disponibles pour un thème spécifique.
+
+    :param con: Connexion active à la base de données.
+    :param theme: Nom du thème pour lequel récupérer les exercices.
+    :returns: Liste des noms d'exercices pour le thème donné.
+    """
+    exercise_list = con.execute(
+        "SELECT exercise_name FROM exercises WHERE theme = ? ORDER BY exercise_name",
+        (theme,),
+    ).fetchall()
+    return [exercise[0] for exercise in exercise_list]
+
+
 def main() -> None:
     """Fonction principale de l'application Streamlit pour initier
     la base de données et afficher les exercices SQL."""
