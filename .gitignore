@@ -1,0 +1,9 @@
+# Ignorer les fichiers et dossiers temporaires de Python
+__pycache__/
+*.pyc
+
+# Ignorer les fichiers et dossiers de configuration
+.idea/
+
+# Ignorer le dossier d'environnement virtuel
+venv/
