@@ -96,6 +96,27 @@ def get_exercises_for_theme(con: duckdb.DuckDBPyConnection, theme: str) -> list[
     return [exercise[0] for exercise in exercise_list]
 
 
+def load_exercise_data(
+    con: duckdb.DuckDBPyConnection, theme: str, exercise_name: str
+) -> dict | None:
+    """Charge les données associées à un exercice spécifique.
+
+    :param con: Connexion active à la base de données.
+    :param theme: Nom du thème de l'exercice.
+    :param exercise_name: Nom de l'exercice.
+    :returns: Dictionnaire contenant les données de l'exercice, ou None si vide.
+    """
+    exercise_data = con.execute(
+        "SELECT * FROM exercises WHERE theme = ? AND exercise_name = ?",
+        (theme, exercise_name),
+    ).fetchone()
+    if exercise_data:
+        # Conversion en dictionnaire pour faciliter l'accès aux données
+        column_names = [desc[0] for desc in con.description]
+        return dict(zip(column_names, exercise_data))
+    return None
+
+
 def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) -> str:
     """Gère la sélection du thème et de l'exercice dans la barre latérale.
 
