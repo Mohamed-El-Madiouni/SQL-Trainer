@@ -86,12 +86,48 @@ def get_exercises_for_theme(con: duckdb.DuckDBPyConnection, theme: str) -> list[
     return [exercise[0] for exercise in exercise_list]
 
 
+def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) -> str:
+    """Gère la sélection du thème et de l'exercice dans la barre latérale.
+
+    :param con: Connexion active à la base de données.
+    :param available_themes: Liste des thèmes disponibles.
+    :returns: L'exercice sélectionné.
+    """
+    with st.sidebar:
+        st.selectbox(
+            "Changer de thème :",
+            available_themes,
+            index=(
+                available_themes.index(st.session_state.option)
+                if st.session_state.option in available_themes
+                else 0
+            ),
+            key="sidebar_selected_theme",
+            on_change=lambda: st.session_state.update(
+                {"option": st.session_state.sidebar_selected_theme}
+            ),
+        )
+
+        exercises = get_exercises_for_theme(con, st.session_state.option)
+        current_exercise = st.selectbox(
+            "Choisissez un exercice :",
+            exercises,
+            key="sidebar_selected_exercise",
+            placeholder="Choisissez un exercice...",
+        )
+
+        st.session_state.exercise = current_exercise
+    return current_exercise
+
+
 def main() -> None:
     """Fonction principale de l'application Streamlit pour initier
     la base de données et afficher les exercices SQL."""
     init_database("db.duckdb")  # Initialiser la base de données
-    con = connect_db("db.duckdb")  # Connexion à la base de données # pylint: disable=unused-variable
+    con = connect_db("db.duckdb")  # Connexion à la base de données
     init_session_state()
+    available_themes = get_available_themes(con)  # Récupérer les thèmes disponibles
+    handle_sidebar(con, available_themes)  # Gestion de la barre latérale
     show_welcome_screen()
 
 
