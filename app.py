@@ -11,6 +11,8 @@ import os
 import duckdb
 import streamlit as st
 
+from init_db import initialize_database_tables
+
 
 def connect_db(name: str) -> duckdb.DuckDBPyConnection:
     """Connecte à la base de données DuckDB.
@@ -33,7 +35,7 @@ def init_database(name: str) -> None:
     # Initialise la base de données si le fichier n'existe pas
     if name not in os.listdir("data"):
         con = connect_db(name)
-        # Ajout d'un appel fictif pour la création de tables (à remplacer plus tard)
+        initialize_database_tables(con)  # Initialisation des tables
         con.close()
 
 
@@ -56,6 +58,18 @@ def show_welcome_screen() -> None:
     st.subheader(
         "Une plateforme interactive pour maîtriser SQL à travers des exercices pratiques."
     )
+
+
+def get_available_themes(con: duckdb.DuckDBPyConnection) -> list[str]:
+    """Récupère la liste des thèmes disponibles dans la base de données.
+
+    :param con: Connexion active à la base de données.
+    :returns: Liste des thèmes disponibles, ordonnée alphabétiquement.
+    """
+    available_themes = con.execute(
+        "SELECT DISTINCT theme FROM exercises ORDER BY theme"
+    ).fetchall()
+    return [theme[0] for theme in available_themes]
 
 
 def main() -> None:
