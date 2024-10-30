@@ -47,3 +47,12 @@ def init_session_state() -> None:
         st.session_state.exercise = ""
     if "user_query" not in st.session_state:
         st.session_state.user_query = ""
+
+
+def show_welcome_screen() -> None:
+    """Affiche un écran de bienvenue dans l'application Streamlit pour les utilisateurs."""
+
+    st.title("Bienvenue sur **SQL Trainer** 🐘")
+    st.subheader(
+        "Une plateforme interactive pour maîtriser SQL à travers des exercices pratiques."
+    )
