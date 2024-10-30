@@ -51,12 +51,22 @@ def init_session_state() -> None:
         st.session_state.user_query = ""
 
 
-def show_welcome_screen() -> None:
-    """Affiche un écran de bienvenue dans l'application Streamlit pour les utilisateurs."""
+def show_welcome_screen(available_themes: list[str]) -> None:
+    """Affiche un écran de bienvenue et une sélection de thème."""
 
     st.title("Bienvenue sur **SQL Trainer** 🐘")
     st.subheader(
         "Une plateforme interactive pour maîtriser SQL à travers des exercices pratiques."
+    )
+    st.selectbox(
+        "Choisissez un thème pour commencer :",
+        available_themes,
+        index=None,  # Aucun thème sélectionné par défaut
+        key="initial_theme_selection",
+        placeholder="Choisissez un thème...",
+        on_change=lambda: st.session_state.update(
+            {"option": st.session_state.initial_theme_selection}
+        ),
     )
 
 
@@ -127,8 +137,16 @@ def main() -> None:
     con = connect_db("db.duckdb")  # Connexion à la base de données
     init_session_state()
     available_themes = get_available_themes(con)  # Récupérer les thèmes disponibles
-    handle_sidebar(con, available_themes)  # Gestion de la barre latérale
-    show_welcome_screen()
+
+    # Affichage conditionnel
+    if not st.session_state.option:
+        show_welcome_screen(
+            available_themes
+        )  # Afficher la page d'accueil si aucun thème n'est sélectionné
+    else:
+        handle_sidebar(
+            con, available_themes
+        )  # Afficher la barre latérale après sélection d'un thème
 
 
 if __name__ == "__main__":
