@@ -7,3 +7,7 @@ __pycache__/
 
 # Ignorer le dossier d'environnement virtuel
 venv/
+
+# Ignorer la base de données DuckDB et les fichiers de log
+data/*.duckdb
+log/
