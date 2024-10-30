@@ -9,6 +9,7 @@ interactive avec Streamlit pour que les utilisateurs puissent pratiquer SQL.
 import os
 
 import duckdb
+import streamlit as st
 
 
 def connect_db(name: str) -> duckdb.DuckDBPyConnection:
@@ -34,3 +35,15 @@ def init_database(name: str) -> None:
         con = connect_db(name)
         # Ajout d'un appel fictif pour la création de tables (à remplacer plus tard)
         con.close()
+
+
+def init_session_state() -> None:
+    """Initialise les variables de l'état de session Streamlit pour l'option,
+    l'exercice et la requête de l'utilisateur."""
+
+    if "option" not in st.session_state:
+        st.session_state.option = ""
+    if "exercise" not in st.session_state:
+        st.session_state.exercise = ""
+    if "user_query" not in st.session_state:
+        st.session_state.user_query = ""
