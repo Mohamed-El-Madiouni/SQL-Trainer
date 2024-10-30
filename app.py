@@ -56,3 +56,14 @@ def show_welcome_screen() -> None:
     st.subheader(
         "Une plateforme interactive pour maîtriser SQL à travers des exercices pratiques."
     )
+
+
+def main() -> None:
+    """Fonction principale de l'application Streamlit pour initier
+    la base de données et afficher les exercices SQL."""
+    init_session_state()
+    show_welcome_screen()
+
+
+if __name__ == "__main__":
+    main()
