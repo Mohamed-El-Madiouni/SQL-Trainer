@@ -148,6 +148,19 @@ def validate_age_column(df: pd.DataFrame, file_path: str) -> None:
             logging.info(extreme_ages)
 
 
+def process_csv_files(con: duckdb.DuckDBPyConnection, csv_folder: str) -> None:
+    """Parcourt tous les fichiers CSV d'un dossier et les charge dans la base de données.
+
+    :param con: Connexion active à la base de données DuckDB.
+    :param csv_folder: Chemin vers le dossier contenant les fichiers CSV.
+    """
+    for csv_file in os.listdir(csv_folder):
+        if csv_file.endswith(".csv"):
+            table_name = os.path.splitext(csv_file)[0]
+            file_path = os.path.join(csv_folder, csv_file)
+            load_csv_to_db(con, file_path, table_name)
+
+
 def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée les tables de données nécessaires en chargeant les fichiers CSV.
 
