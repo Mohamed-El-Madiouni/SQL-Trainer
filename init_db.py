@@ -59,14 +59,40 @@ def create_exercise_table_in_db(con: duckdb.DuckDBPyConnection) -> None:
 def load_csv_to_db(
     con: duckdb.DuckDBPyConnection, file_path: str, table_name: str
 ) -> None:
-    """Charge un fichier CSV dans une table DuckDB.
+    """Charge un fichier CSV dans une table DuckDB avec validation des données."""
 
-    :param con: Connexion active à la base de données.
-    :param file_path: Chemin vers le fichier CSV.
-    :param table_name: Nom de la table dans la base de données.
-    """
-    df = pd.read_csv(file_path)  # pylint: disable=unused-variable
-    con.execute(f"CREATE TABLE IF NOT EXISTS {table_name} AS SELECT * FROM df")
+    try:
+        # Lecture du CSV avec Pandas
+        df = pd.read_csv(file_path, sep=",")
+
+        # Validation des données selon le fichier
+        if file_path == "./data/department.csv":
+            validate_department_columns(df, file_path)
+        elif file_path in ("./data/employees.csv", "./data/employees_test.csv"):
+            validate_employee_columns(df, file_path)
+
+        # Validation des valeurs extrêmes et des types
+        validate_salary_column(df, file_path)
+        validate_age_column(df, file_path)
+
+        # Insertion des données après validation
+        con.execute(f"CREATE TABLE IF NOT EXISTS {table_name} AS SELECT * FROM df")
+        logging.info(
+            "Table '%s' créée avec succès à partir du fichier %s", table_name, file_path
+        )
+
+    except FileNotFoundError as e:
+        logging.error("Fichier non trouvé : %s", e)
+    except pd.errors.EmptyDataError as e:
+        logging.error("Fichier vide ou données incorrectes : %s", e)
+    except pd.errors.ParserError as e:
+        logging.error("Erreur de parsing dans %s : %s", file_path, e)
+    except ValueError as e:
+        logging.error("Erreur de validation des données pour %s : %s", file_path, e)
+    except duckdb.Error as e:  # Gestion des erreurs DuckDB
+        logging.error(
+            "Erreur SQL dans la table %s pour %s : %s", table_name, file_path, e
+        )
 
 
 def validate_department_columns(df: pd.DataFrame, file_path: str) -> None:
