@@ -151,6 +151,24 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
     return current_exercise
 
 
+def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
+    """Affiche les détails de l'exercice sélectionné dans l'interface.
+
+    :param con: Connexion active à la base de données.
+    """
+    if st.session_state.exercise:
+        exercise_data = load_exercise_data(
+            con, st.session_state.option, st.session_state.exercise
+        )
+        if exercise_data:
+            st.write("### Détails de l'exercice sélectionné :")
+            st.write(f"**Question** : {exercise_data['question']}")
+            st.write("**Réponse attendue** :")
+            st.code(exercise_data["answer"], language="sql")
+        else:
+            st.write("Les données de l'exercice n'ont pas pu être chargées.")
+
+
 def main() -> None:
     """Fonction principale de l'application Streamlit pour initier
     la base de données et afficher les exercices SQL."""
@@ -168,6 +186,7 @@ def main() -> None:
         handle_sidebar(
             con, available_themes
         )  # Afficher la barre latérale après sélection d'un thème
+        display_exercise_details(con)  # Afficher les détails de l'exercice sélectionné
 
 
 if __name__ == "__main__":
