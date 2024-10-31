@@ -119,6 +119,22 @@ def validate_employee_columns(df: pd.DataFrame, file_path: str) -> None:
         )
 
 
+def validate_salary_column(df: pd.DataFrame, file_path: str) -> None:
+    """Vérifie les valeurs extrêmes dans la colonne 'salary'.
+
+    :param df: DataFrame contenant les données du fichier employees.
+    :param file_path: Chemin vers le fichier CSV pour les logs.
+    """
+    if "salary" in df.columns:
+        extreme_salaries = df[(df["salary"] < 10000) | (df["salary"] > 200000)]
+        if not extreme_salaries.empty:
+            logging.info("Valeurs extrêmes détectées dans 'salary' pour %s", file_path)
+            logging.info(extreme_salaries)
+            raise ValueError(
+                f"Valeurs extrêmes détectées dans 'salary' pour {file_path}"
+            )
+
+
 def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée les tables de données nécessaires en chargeant les fichiers CSV.
 
