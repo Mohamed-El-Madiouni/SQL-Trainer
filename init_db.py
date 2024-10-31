@@ -5,10 +5,22 @@ Il comprend des fonctions pour charger les fichiers CSV, valider les données,
 créer des tables nécessaires et surveiller la qualité des données via un système de logs.
 """
 
+import logging
 import os
 
 import duckdb
 import pandas as pd
+
+# Création du dossier log si nécessaire
+if not os.path.exists("log"):
+    os.makedirs("log")
+
+# Configuration du logger pour surveiller la qualité des données
+logging.basicConfig(
+    filename="./log/data_quality.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def check_data_directory_exists() -> None:
