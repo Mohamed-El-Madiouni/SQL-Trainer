@@ -135,6 +135,19 @@ def validate_salary_column(df: pd.DataFrame, file_path: str) -> None:
             )
 
 
+def validate_age_column(df: pd.DataFrame, file_path: str) -> None:
+    """Vérifie les valeurs extrêmes dans la colonne 'age'.
+
+    :param df: DataFrame contenant les données du fichier employees.
+    :param file_path: Chemin vers le fichier CSV pour les logs.
+    """
+    if "age" in df.columns:
+        extreme_ages = df[(df["age"] < 18) | (df["age"] > 65)]
+        if not extreme_ages.empty:
+            logging.info("Valeurs extrêmes détectées dans 'age' pour %s", file_path)
+            logging.info(extreme_ages)
+
+
 def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée les tables de données nécessaires en chargeant les fichiers CSV.
 
