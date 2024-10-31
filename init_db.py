@@ -94,6 +94,31 @@ def validate_department_columns(df: pd.DataFrame, file_path: str) -> None:
         )
 
 
+def validate_employee_columns(df: pd.DataFrame, file_path: str) -> None:
+    """Valide les colonnes et données du fichier employees.csv.
+
+    :param df: DataFrame contenant les données du fichier employees.
+    :param file_path: Chemin vers le fichier CSV pour les logs.
+    :raises ValueError: Si des colonnes sont manquantes ou si des valeurs nulles sont détectées.
+    """
+    expected_columns = {"id", "name", "age", "department", "salary"}
+    missing_columns = expected_columns - set(df.columns)
+    if missing_columns:
+        logging.warning("Colonnes manquantes dans %s: %s", file_path, missing_columns)
+        raise ValueError(f"Colonnes manquantes dans {file_path}: {missing_columns}")
+
+    if df.isnull().values.any():
+        null_count = df.isnull().sum().sum()
+        logging.warning(
+            "Données manquantes détectées dans %s: %s valeurs nulles",
+            file_path,
+            null_count,
+        )
+        raise ValueError(
+            f"Données manquantes dans {file_path}: {null_count} valeurs nulles"
+        )
+
+
 def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée les tables de données nécessaires en chargeant les fichiers CSV.
 
