@@ -69,6 +69,31 @@ def load_csv_to_db(
     con.execute(f"CREATE TABLE IF NOT EXISTS {table_name} AS SELECT * FROM df")
 
 
+def validate_department_columns(df: pd.DataFrame, file_path: str) -> None:
+    """Valide les colonnes et données du fichier department.csv.
+
+    :param df: DataFrame contenant les données du fichier department.
+    :param file_path: Chemin vers le fichier CSV pour les logs.
+    :raises ValueError: Si des colonnes sont manquantes ou si des valeurs nulles sont détectées.
+    """
+    expected_columns = {"id", "department_name", "location"}
+    missing_columns = expected_columns - set(df.columns)
+    if missing_columns:
+        logging.warning("Colonnes manquantes dans %s: %s", file_path, missing_columns)
+        raise ValueError(f"Colonnes manquantes dans {file_path}: {missing_columns}")
+
+    if df.isnull().values.any():
+        null_count = df.isnull().sum().sum()
+        logging.warning(
+            "Données manquantes détectées dans %s: %s valeurs nulles",
+            file_path,
+            null_count,
+        )
+        raise ValueError(
+            f"Données manquantes dans {file_path}: {null_count} valeurs nulles"
+        )
+
+
 def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée les tables de données nécessaires en chargeant les fichiers CSV.
 
