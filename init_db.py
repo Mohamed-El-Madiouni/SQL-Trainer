@@ -11,6 +11,12 @@ import duckdb
 import pandas as pd
 
 
+def check_data_directory_exists() -> None:
+    """Vérifie l'existence du dossier de données et le crée s'il n'existe pas."""
+    if not os.path.exists("data"):
+        os.makedirs("data")
+
+
 def create_exercise_table_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée la table 'exercises' pour les exercices dans la base de données.
 
@@ -68,6 +74,7 @@ def initialize_database_tables(con: duckdb.DuckDBPyConnection) -> None:
 
     :param con: Connexion active à la base de données DuckDB.
     """
+    check_data_directory_exists()  # Vérifier l'existence du dossier de données
     create_exercise_table_in_db(con)
     create_data_tables_in_db(
         con
