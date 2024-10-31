@@ -1,0 +1,1 @@
+Sélectionnez les départements qui ont des employés avec un salaire supérieur à 60000.

@@ -1,0 +1,1 @@
+Récupérez tous les employés avec leur salaire et le salaire moyen du département.

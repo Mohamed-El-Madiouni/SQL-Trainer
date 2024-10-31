@@ -1,0 +1,1 @@
+Calculez le salaire total des employés.

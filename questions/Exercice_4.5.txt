@@ -1,0 +1,1 @@
+Récupérez la différence de salaire par rapport à la moyenne du département.

@@ -1,0 +1,2 @@
+Sélectionnez l'âge moyen des employés.
+Vous nommerez ce champ : 'moy_age'.

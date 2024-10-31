@@ -1,0 +1,1 @@
+Récupérez les employés qui n'ont pas de salaire égal à celui de l'employé avec l'ID 1.

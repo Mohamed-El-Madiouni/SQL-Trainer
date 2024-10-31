@@ -1,0 +1,1 @@
+Récupérez les départements et le nombre d'employés de moins de 30 ans.

@@ -1,0 +1,1 @@
+Sélectionnez les employés dont le salaire est inférieur à 55000.

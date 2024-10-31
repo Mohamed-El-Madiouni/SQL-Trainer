@@ -1,0 +1,1 @@
+Récupérez tous les employés avec leur rang de salaire dans leur département.

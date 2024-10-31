@@ -1,0 +1,1 @@
+Récupérez tous les départements avec le nombre d'employés dans chaque.

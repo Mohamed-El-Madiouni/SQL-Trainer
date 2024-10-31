@@ -1,0 +1,1 @@
+Récupérez le salaire cumulatif des employés par ordre croissant.

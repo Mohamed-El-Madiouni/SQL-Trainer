@@ -1,0 +1,1 @@
+Récupérez le salaire et le salaire précédent d'un employé.

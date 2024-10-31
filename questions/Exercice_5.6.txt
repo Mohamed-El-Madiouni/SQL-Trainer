@@ -1,0 +1,1 @@
+Récupérez le département avec le salaire moyen le plus élevé.

@@ -1,0 +1,1 @@
+Récupérez le pourcentage des salaires dans chaque département.

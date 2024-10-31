@@ -1,0 +1,1 @@
+Récupérez les employés dont le salaire est inférieur à la moyenne des salaires de leur département.

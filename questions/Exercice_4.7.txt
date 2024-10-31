@@ -1,0 +1,1 @@
+Récupérez les employés avec un salaire supérieur à la moyenne de leur département.

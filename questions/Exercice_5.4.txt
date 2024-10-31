@@ -1,0 +1,1 @@
+Trouvez les employés dont le salaire est supérieur au salaire du département IT.

@@ -1,0 +1,1 @@
+Récupérez les départements et les employés, même si certains départements n'ont pas d'employés.

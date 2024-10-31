@@ -1,0 +1,1 @@
+Trouvez le salaire minimum des employés.
