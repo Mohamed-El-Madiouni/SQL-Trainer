@@ -243,6 +243,8 @@ def main() -> None:
         )  # Afficher la barre latérale après sélection d'un thème
         display_exercise_details(con)  # Afficher les détails de l'exercice sélectionné
         display_related_tables(con, ["employees", "department"])
+        st.text_area("Saisissez votre requête SQL : ", key="user_query")
+        st.button("Exécuter")
 
 
 if __name__ == "__main__":
