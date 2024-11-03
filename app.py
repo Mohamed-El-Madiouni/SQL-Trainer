@@ -10,6 +10,7 @@ import logging
 import os
 
 import duckdb
+import pandas as pd
 import streamlit as st
 
 from init_db import initialize_database_tables
@@ -151,15 +152,21 @@ def display_related_tables(con: duckdb.DuckDBPyConnection, tables: list[str]) ->
         try:
             table_data = con.execute(f"SELECT * FROM {table} LIMIT 3").df()
             st.dataframe(table_data)
-        except duckdb.Error as e:
-            st.error(f"Erreur lors du chargement de la table {table} : \n\n{e}")
+        except duckdb.Error as exception:
+            st.error(f"Erreur lors du chargement de la table {table} : \n\n{exception}")
             logging.error(
-                "Erreur DuckDB lors du chargement de la table %s: \n\n%s", table, e
+                "Erreur DuckDB lors du chargement de la table %s: \n\n%s",
+                table,
+                exception,
             )
-        except KeyError as e:
-            st.error(f"Erreur : colonne ou table introuvable dans {table} : \n\n{e}")
+        except KeyError as exception:
+            st.error(
+                f"Erreur : colonne ou table introuvable dans {table} : \n\n{exception}"
+            )
             logging.error(
-                "Erreur de colonne ou table introuvable pour %s: \n\n%s", table, e
+                "Erreur de colonne ou table introuvable pour %s: \n\n%s",
+                table,
+                exception,
             )
 
 
@@ -200,6 +207,34 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
     return current_exercise
 
 
+def execute_user_query(
+    con: duckdb.DuckDBPyConnection, query: str, sort_order: str
+) -> tuple[pd.DataFrame, bool]:
+    """Exécute la requête SQL de l'utilisateur et retourne le résultat trié si possible.
+
+    :param con: Connexion active à la base de données.
+    :param query: Requête SQL à exécuter.
+    :param sort_order: Nom de la colonne utilisée pour trier le résultat.
+    :returns: DataFrame contenant le résultat de la requête et booléen indiquant
+    si l'exécution a réussi.
+    """
+    try:
+        result_df = con.execute(query).df()
+        if sort_order in result_df.columns:
+            result_df = result_df.sort_values(by=sort_order).reset_index(drop=True)
+        return result_df, True
+    except duckdb.Error as exception:
+        st.error(f"Erreur dans la requête SQL : \n\n{exception}")
+        logging.error("Erreur dans la requête SQL : %s", exception)
+        return pd.DataFrame(), False  # Retourner un tuple pour respecter la signature
+    except KeyError as exception:
+        st.error(f"Erreur de tri, colonne manquante : {sort_order}")
+        logging.error(
+            "Erreur de tri - colonne manquante : %s\n\n%s", sort_order, exception
+        )
+        return pd.DataFrame(), False
+
+
 def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
     """Affiche les détails de l'exercice sélectionné dans l'interface.
 
@@ -213,11 +248,14 @@ def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
         if exercise_data:
             answer_name = exercise_data["exercise_name"]
             question_name = exercise_data["question"]
-            # sort_order = exercise_data["order"]
+            sort_order = exercise_data["order"]
 
             exercise_answer, exercise_question = load_question_and_solution(
                 answer_name, question_name
             )
+            solution_df = con.execute(  # pylint:disable=(unused-variable)
+                exercise_answer
+            ).df()
 
             tab_exercise, tab_answer = st.tabs(["Exercice", "Solution"])
             with tab_exercise:
@@ -227,8 +265,14 @@ def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
                     unsafe_allow_html=True,
                 )
                 display_related_tables(con, ["employees", "department"])
-                st.text_area("Saisissez votre requête SQL : ", key="user_query")
-                st.button("Exécuter")
+
+                query = st.text_area("Saisissez votre requête SQL : ", key="user_query")
+                if st.button("Exécuter"):
+                    if query:
+                        user_df, succes = execute_user_query(con, query, sort_order)
+                        if succes:
+                            st.write("Résultat de votre requête : ")
+                            st.dataframe(user_df)
 
             with tab_answer:
                 st.write("### Réponse attendue :")
