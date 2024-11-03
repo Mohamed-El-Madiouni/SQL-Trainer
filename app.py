@@ -193,6 +193,9 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
             placeholder="Choisissez un exercice...",
         )
 
+        if st.session_state.exercise != current_exercise:
+            st.session_state.user_query = ""
+
         st.session_state.exercise = current_exercise
     return current_exercise
 
