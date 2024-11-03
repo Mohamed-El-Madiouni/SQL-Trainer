@@ -207,6 +207,56 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
     return current_exercise
 
 
+def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | None:
+    """Compare le résultat de l'utilisateur avec la solution et affiche les différences.
+
+    :param solution_df: DataFrame contenant la solution correcte.
+    :param user_df: DataFrame contenant la réponse de l'utilisateur.
+    :returns: Message de victoire si la réponse est correcte, None sinon.
+    """
+    victory_message = None
+    try:
+        check = user_df.compare(solution_df)
+        if solution_df.equals(user_df):
+            st.write("Félicitations, vous avez résolu l'exercice ! 🏆")
+        else:
+            st.error("il y a une erreur au niveau de ces champs : ")
+            st.dataframe(check)
+    except ValueError:
+        missing_cols = [
+            col for col in solution_df.columns if col not in user_df.columns
+        ]
+        unwanted_cols = [
+            col for col in user_df.columns if col not in solution_df.columns
+        ]
+
+        if missing_cols:
+            msg_error = "Colonnes manquantes : \n" + "\n".join(
+                f"- {col}" for col in missing_cols
+            )
+            st.error(msg_error)
+        if unwanted_cols:
+            msg_error = "Colonnes en trop : \n" + "\n".join(
+                f"- {col}" for col in unwanted_cols
+            )
+            st.error(msg_error)
+
+        if solution_df.shape[0] > user_df.shape[0]:
+            st.error(
+                f"{solution_df.shape[0] - user_df.shape[0]} lignes attendues ne sont pas présentes."
+            )
+        elif solution_df.shape[0] < user_df.shape[0]:
+            st.error(
+                f"{user_df.shape[0] - solution_df.shape[0]} lignes supplémentaires retournées."
+            )
+    except (KeyError, AttributeError, TypeError) as exception:
+        st.error(f"Erreur lors de la comparaison des résultats : \n\n\n\n{exception}")
+        logging.error(
+            "Erreur lors de la comparaison des résultats : \n\n\n\n%s", exception
+        )
+    return victory_message
+
+
 def execute_user_query(
     con: duckdb.DuckDBPyConnection, query: str, sort_order: str
 ) -> tuple[pd.DataFrame, bool]:
@@ -271,11 +321,12 @@ def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
                     if query:
                         user_df, succes = execute_user_query(con, query, sort_order)
                         if succes:
+                            compare_results(solution_df, user_df)
                             st.write("Résultat de votre requête : ")
                             st.dataframe(user_df)
 
             with tab_answer:
-                st.write("### Réponse attendue :")
+                st.write("### Solution de l'exercice :")
                 st.code(exercise_answer, language="sql")
 
         else:
