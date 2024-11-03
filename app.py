@@ -6,6 +6,7 @@ charge les exercices et les solutions SQL, et fournit une interface
 interactive avec Streamlit pour que les utilisateurs puissent pratiquer SQL.
 """
 
+import logging
 import os
 
 import duckdb
@@ -117,6 +118,25 @@ def load_exercise_data(
     return None
 
 
+def load_question_and_solution(answer_name: str, question_name: str) -> tuple[str, str]:
+    """Charge les fichiers de question et de solution pour un exercice donné.
+
+    :param answer_name: Nom du fichier de la solution.
+    :param question_name: Nom du fichier de la question.
+    :returns: Contient le texte de la solution et le texte de la question.
+    """
+    try:
+        with open(f"./answer/{answer_name}.sql", "r", encoding="UTF-8") as file:
+            answer = file.read()
+        with open(f"./questions/{question_name}.txt", "r", encoding="UTF-8") as file:
+            question = file.read()
+    except FileNotFoundError as exception:
+        st.error(f"Erreur lors du chargement des fichiers : \n\n{exception}")
+        logging.error("Erreur lors du chargement des fichiers : \n\n%s", exception)
+        return "", ""
+    return answer, question
+
+
 def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) -> str:
     """Gère la sélection du thème et de l'exercice dans la barre latérale.
 
@@ -160,13 +180,22 @@ def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
         exercise_data = load_exercise_data(
             con, st.session_state.option, st.session_state.exercise
         )
+
         if exercise_data:
-            st.write("### Détails de l'exercice sélectionné :")
-            st.write(f"**Question** : {exercise_data['question']}")
+            answer_name = exercise_data["exercise_name"]
+            question_name = exercise_data["question"]
+            #            sort_order = exercise_data["order"]
+
+            exercise_answer, exercise_question = load_question_and_solution(
+                answer_name, question_name
+            )
+            st.write("### Consigne de l'exercice sélectionné :")
+            st.write(exercise_question)
             st.write("**Réponse attendue** :")
-            st.code(exercise_data["answer"], language="sql")
+            st.code(exercise_answer, language="sql")
         else:
-            st.write("Les données de l'exercice n'ont pas pu être chargées.")
+            st.error("Les données de l'exercice n'ont pas pu être chargées.")
+            logging.error("Les données de l'exercice n'ont pas pu être chargées.")
 
 
 def main() -> None:

@@ -29,31 +29,58 @@ def check_data_directory_exists() -> None:
         os.makedirs("data")
 
 
+def generate_exercise_dataframe() -> pd.DataFrame:
+    """Génère un DataFrame contenant les données pour la table des exercices.
+
+    :returns: DataFrame contenant les thèmes, noms d'exercices, ordres et questions.
+    """
+    distinct_themes = [
+        "1. Sélection Simple",
+        "2. Joins",
+        "3. Fonctions d’Agrégation",
+        "4. Window Functions",
+        "5. Sous-requêtes",
+    ]
+    theme_list = []
+    exercise_names = []
+    questions = []
+    theme_number = 0
+    for theme in distinct_themes:
+        theme_number += 1
+        for j in range(7):
+            theme_list.append(theme)
+            exercise_names.append(f"Exercice_{theme_number}.{j + 1}")
+            questions.append(f"Exercice_{theme_number}.{j + 1}")
+
+    orders = []
+    # Lire chaque ligne du fichier et l'ajouter à la liste `orders`
+    with open("./data/order.txt", "r", encoding="utf-8") as file:
+        for line in file:
+            orders.append(
+                line.strip()
+            )  # .strip() pour enlever les éventuels espaces et sauts de ligne
+
+    return pd.DataFrame(
+        {
+            "theme": theme_list,
+            "exercise_name": exercise_names,
+            "order": orders,
+            "question": questions,
+        }
+    )
+
+
 def create_exercise_table_in_db(con: duckdb.DuckDBPyConnection) -> None:
     """Crée la table 'exercises' pour les exercices dans la base de données.
 
     :param con: Connexion active à la base de données DuckDB.
     """
-    # Exemples de données pour les thèmes, exercices, questions et réponses
-    data = {
-        "theme": ["SQL Basics", "Joins", "Aggregation"],
-        "exercise_name": ["Exercice 1", "Exercice 2", "Exercice 3"],
-        "question": [
-            "Sélectionnez tous les employés.",
-            "Affichez les employés avec leur département.",
-            "Calculez le salaire moyen par département.",
-        ],
-        "answer": [
-            "SELECT * FROM employees;",
-            "SELECT employees.name, department.department_name FROM employees JOIN "
-            "department ON employees.department = department.id;",
-            "SELECT department, AVG(salary) FROM employees GROUP BY department;",
-        ],
-    }
-    exercises_df = pd.DataFrame(data)  # pylint: disable=unused-variable
+    tab_df = generate_exercise_dataframe()  # pylint:disable=(unused-variable)
+    try:
+        con.execute("CREATE TABLE IF NOT EXISTS exercises AS SELECT * FROM tab_df")
 
-    # Créer la table 'exercises' avec les données d'exemple
-    con.execute("CREATE TABLE IF NOT EXISTS exercises AS SELECT * FROM exercises_df")
+    except duckdb.Error as e:
+        print(f"Erreur lors de la création de la table 'tab': {e}")
 
 
 def load_csv_to_db(
@@ -204,8 +231,12 @@ def initialize_database_tables(con: duckdb.DuckDBPyConnection) -> None:
 
     :param con: Connexion active à la base de données DuckDB.
     """
+    csv_directory = "./data"
     check_data_directory_exists()  # Vérifier l'existence du dossier de données
+    process_csv_files(con, csv_directory)
     create_exercise_table_in_db(con)
-    create_data_tables_in_db(
-        con
-    )  # Charger les tables de données depuis les fichiers CSV
+
+
+#    create_data_tables_in_db(
+#        con
+#    )  # Charger les tables de données depuis les fichiers CSV
