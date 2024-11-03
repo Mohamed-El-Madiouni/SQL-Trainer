@@ -95,12 +95,10 @@ def load_csv_to_db(
         # Validation des données selon le fichier
         if file_path == "./data/department.csv":
             validate_department_columns(df, file_path)
-        elif file_path in ("./data/employees.csv", "./data/employees_test.csv"):
+        if file_path in ("./data/employees.csv", "./data/employees_test.csv"):
             validate_employee_columns(df, file_path)
-
-        # Validation des valeurs extrêmes et des types
-        validate_salary_column(df, file_path)
-        validate_age_column(df, file_path)
+            validate_salary_column(df, file_path)
+            validate_age_column(df, file_path)
 
         # Insertion des données après validation
         con.execute(f"CREATE TABLE IF NOT EXISTS {table_name} AS SELECT * FROM df")
@@ -235,8 +233,3 @@ def initialize_database_tables(con: duckdb.DuckDBPyConnection) -> None:
     check_data_directory_exists()  # Vérifier l'existence du dossier de données
     process_csv_files(con, csv_directory)
     create_exercise_table_in_db(con)
-
-
-#    create_data_tables_in_db(
-#        con
-#    )  # Charger les tables de données depuis les fichiers CSV
