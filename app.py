@@ -137,6 +137,32 @@ def load_question_and_solution(answer_name: str, question_name: str) -> tuple[st
     return answer, question
 
 
+def display_related_tables(con: duckdb.DuckDBPyConnection, tables: list[str]) -> None:
+    """Affiche les tables liées à l'exercice en affichant les premières lignes de chaque table.
+
+    :param con: Connexion active à la base de données.
+    :param tables: Liste des noms de tables à afficher.
+    """
+    for table in tables:
+        if table == "employees":
+            st.write(f"Voici les 5 premières lignes de la table {table} :")
+        else:
+            st.write(f"Voici la table {table} :")
+        try:
+            table_data = con.execute(f"SELECT * FROM {table} LIMIT 5").df()
+            st.dataframe(table_data)
+        except duckdb.Error as e:
+            st.error(f"Erreur lors du chargement de la table {table} : \n\n{e}")
+            logging.error(
+                "Erreur DuckDB lors du chargement de la table %s: \n\n%s", table, e
+            )
+        except KeyError as e:
+            st.error(f"Erreur : colonne ou table introuvable dans {table} : \n\n{e}")
+            logging.error(
+                "Erreur de colonne ou table introuvable pour %s: \n\n%s", table, e
+            )
+
+
 def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) -> str:
     """Gère la sélection du thème et de l'exercice dans la barre latérale.
 
@@ -216,6 +242,7 @@ def main() -> None:
             con, available_themes
         )  # Afficher la barre latérale après sélection d'un thème
         display_exercise_details(con)  # Afficher les détails de l'exercice sélectionné
+        display_related_tables(con, ["employees", "department"])
 
 
 if __name__ == "__main__":
