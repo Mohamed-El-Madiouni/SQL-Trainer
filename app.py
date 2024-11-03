@@ -8,6 +8,7 @@ interactive avec Streamlit pour que les utilisateurs puissent pratiquer SQL.
 
 import logging
 import os
+import time
 
 import duckdb
 import pandas as pd
@@ -207,6 +208,29 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
     return current_exercise
 
 
+def display_victory_message() -> None:
+    """Affiche un message de victoire avec une animation et retourne le message de victoire.
+
+    :returns: Message de victoire.
+    """
+    victory_message = "Félicitations, vous avez résolu l'exercice ! 🏆"
+    message_container = st.empty()
+
+    displayed_message = ""
+    char_count = 0
+    for letter in victory_message:
+        displayed_message += letter
+        message_container.markdown(
+            f"<h2 style='color: green;'>{displayed_message}</h2>",
+            unsafe_allow_html=True,
+        )
+        time.sleep(0.03)
+        char_count += 1
+
+        if char_count == 30:
+            st.balloons()
+
+
 def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | None:
     """Compare le résultat de l'utilisateur avec la solution et affiche les différences.
 
@@ -216,9 +240,10 @@ def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | N
     """
     victory_message = None
     try:
+        user_df = user_df[solution_df.columns]
         check = user_df.compare(solution_df)
         if solution_df.equals(user_df):
-            st.write("Félicitations, vous avez résolu l'exercice ! 🏆")
+            display_victory_message()
         else:
             st.error("il y a une erreur au niveau de ces champs : ")
             st.dataframe(check)
