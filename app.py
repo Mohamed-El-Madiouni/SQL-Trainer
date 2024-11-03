@@ -145,11 +145,11 @@ def display_related_tables(con: duckdb.DuckDBPyConnection, tables: list[str]) ->
     """
     for table in tables:
         if table == "employees":
-            st.write(f"Voici les 5 premières lignes de la table {table} :")
+            st.write(f"Voici les 3 premières lignes de la table {table} :")
         else:
             st.write(f"Voici la table {table} :")
         try:
-            table_data = con.execute(f"SELECT * FROM {table} LIMIT 5").df()
+            table_data = con.execute(f"SELECT * FROM {table} LIMIT 3").df()
             st.dataframe(table_data)
         except duckdb.Error as e:
             st.error(f"Erreur lors du chargement de la table {table} : \n\n{e}")
@@ -210,15 +210,27 @@ def display_exercise_details(con: duckdb.DuckDBPyConnection) -> None:
         if exercise_data:
             answer_name = exercise_data["exercise_name"]
             question_name = exercise_data["question"]
-            #            sort_order = exercise_data["order"]
+            # sort_order = exercise_data["order"]
 
             exercise_answer, exercise_question = load_question_and_solution(
                 answer_name, question_name
             )
-            st.write("### Consigne de l'exercice sélectionné :")
-            st.write(exercise_question)
-            st.write("**Réponse attendue** :")
-            st.code(exercise_answer, language="sql")
+
+            tab_exercise, tab_answer = st.tabs(["Exercice", "Solution"])
+            with tab_exercise:
+                st.write("### Consigne de l'exercice sélectionné :")
+                st.markdown(
+                    f"<p style='color: #FFA500; font-size: 20px;'>{exercise_question}</p>",
+                    unsafe_allow_html=True,
+                )
+                display_related_tables(con, ["employees", "department"])
+                st.text_area("Saisissez votre requête SQL : ", key="user_query")
+                st.button("Exécuter")
+
+            with tab_answer:
+                st.write("### Réponse attendue :")
+                st.code(exercise_answer, language="sql")
+
         else:
             st.error("Les données de l'exercice n'ont pas pu être chargées.")
             logging.error("Les données de l'exercice n'ont pas pu être chargées.")
@@ -242,9 +254,6 @@ def main() -> None:
             con, available_themes
         )  # Afficher la barre latérale après sélection d'un thème
         display_exercise_details(con)  # Afficher les détails de l'exercice sélectionné
-        display_related_tables(con, ["employees", "department"])
-        st.text_area("Saisissez votre requête SQL : ", key="user_query")
-        st.button("Exécuter")
 
 
 if __name__ == "__main__":

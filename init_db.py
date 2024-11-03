@@ -212,17 +212,6 @@ def process_csv_files(con: duckdb.DuckDBPyConnection, csv_folder: str) -> None:
             load_csv_to_db(con, file_path, table_name)
 
 
-def create_data_tables_in_db(con: duckdb.DuckDBPyConnection) -> None:
-    """Crée les tables de données nécessaires en chargeant les fichiers CSV.
-
-    :param con: Connexion active à la base de données DuckDB.
-    """
-    if os.path.exists("data/employees.csv"):
-        load_csv_to_db(con, "data/employees.csv", "employees")
-    if os.path.exists("data/department.csv"):
-        load_csv_to_db(con, "data/department.csv", "department")
-
-
 def initialize_database_tables(con: duckdb.DuckDBPyConnection) -> None:
     """Crée toutes les tables nécessaires dans la base de données,
     y compris les exercices et les données.
