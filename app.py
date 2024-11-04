@@ -245,9 +245,9 @@ def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | N
         if solution_df.equals(user_df):
             display_victory_message()
         else:
-            st.error("il y a une erreur au niveau de ces champs : ")
+            st.error("il y a une erreur au niveau des valeurs de ces champs : ")
             st.dataframe(check)
-    except ValueError:
+    except KeyError:
         missing_cols = [
             col for col in solution_df.columns if col not in user_df.columns
         ]
@@ -274,7 +274,7 @@ def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | N
             st.error(
                 f"{user_df.shape[0] - solution_df.shape[0]} lignes supplémentaires retournées."
             )
-    except (KeyError, AttributeError, TypeError) as exception:
+    except (ValueError, AttributeError, TypeError) as exception:
         st.error(f"Erreur lors de la comparaison des résultats : \n\n\n\n{exception}")
         logging.error(
             "Erreur lors de la comparaison des résultats : \n\n\n\n%s", exception
