@@ -208,7 +208,7 @@ def handle_sidebar(con: duckdb.DuckDBPyConnection, available_themes: list[str]) 
     return current_exercise
 
 
-def display_victory_message() -> None:
+def display_victory_message() -> str:
     """Affiche un message de victoire avec une animation et retourne le message de victoire.
 
     :returns: Message de victoire.
@@ -229,6 +229,7 @@ def display_victory_message() -> None:
 
         if char_count == 30:
             st.balloons()
+    return victory_message
 
 
 def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | None:
@@ -243,7 +244,7 @@ def compare_results(solution_df: pd.DataFrame, user_df: pd.DataFrame) -> str | N
         user_df = user_df[solution_df.columns]
         check = user_df.compare(solution_df)
         if solution_df.equals(user_df):
-            display_victory_message()
+            victory_message = display_victory_message()
         else:
             st.error("il y a une erreur au niveau des valeurs de ces champs : ")
             st.dataframe(check)
